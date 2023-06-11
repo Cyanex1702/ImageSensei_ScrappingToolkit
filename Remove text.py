@@ -1,13 +1,13 @@
 import os
 import pytesseract
 from PIL import Image
+import concurrent.futures
 
 # Set the path to the folder containing images
-image_folder = 'PathToDirectory'
+image_folder = 'PathtoDirectory'
 
 # Set the path to the Tesseract executable (change it if necessary)
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
 
 # Function to check if an image contains text
 def contains_text(image_path):
@@ -26,29 +26,33 @@ def contains_text(image_path):
     else:
         return False
 
-
 # Initialize a list to store the names of images that had text
 removed_images = []
 
 # Count the total number of images
-total_images = len([filename for filename in os.listdir(image_folder)
-                    if filename.endswith(('.jpg', '.jpeg', '.png'))])
+image_files = []
+for root, dirs, files in os.walk(image_folder):
+    for filename in files:
+        if filename.endswith(('.jpg', '.jpeg', '.png')):
+            image_files.append(os.path.join(root, filename))
+total_images = len(image_files)
 
-# Iterate through the images in the folder
-for index, filename in enumerate(os.listdir(image_folder), start=1):
-    if filename.endswith(('.jpg', '.jpeg', '.png')):
-        image_path = os.path.join(image_folder, filename)
+# Define a function to process each image
+def process_image(image_path):
+    # Check if the image contains text
+    if contains_text(image_path):
+        # If the image contains text, remove it
+        os.remove(image_path)
+        removed_images.append(image_path)
+        print(f"Removed {image_path} as it contains text.")
+    else:
+        print(f"{image_path} does not contain text.")
 
-        # Check if the image contains text
-        if contains_text(image_path):
-            # If the image contains text, remove it
-            os.remove(image_path)
-            removed_images.append(filename)
-            print(f"Removed {filename} as it contains text. ({index}/{total_images})")
-        else:
-            print(f"{filename} does not contain text. ({index}/{total_images})")
+# Use threading to process images concurrently
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    executor.map(process_image, image_files)
 
 # Print the list of images that had text and were removed
 print("\nImages that had text and were removed:")
-for image_name in removed_images:
-    print(image_name)
+for image_path in removed_images:
+    print(image_path)
