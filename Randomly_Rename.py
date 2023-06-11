@@ -27,7 +27,7 @@ def generate_random_name(length=8):
     return ''.join(random.choice(letters_and_digits) for _ in range(length))
 
 # Specify the main directory path
-main_directory = 'Art'
+main_directory = 'PathtoDirectory'
 
 # Call the function to rename the image files
 rename_images(main_directory)
