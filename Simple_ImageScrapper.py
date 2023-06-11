@@ -2,13 +2,16 @@ from bing_image_downloader import downloader
 from pathlib import Path
 
 query_list = [
-
+ # Type you query here
 ]
 
 downloaded_files = set()
 limit_per_query = 150  # Specify the limit per query
 
 directory = Path('PathToDataSet')  # Specify the directory to save the downloaded images
+
+# Create the directory if it doesn't exist
+directory.mkdir(parents=True, exist_ok=True)
 
 for query in query_list:
     output_dir = directory / query
